@@ -1,0 +1,53 @@
+ body {
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+        }
+        
+        main {
+            flex: 1 0 auto;
+        }
+        
+        .footer {
+            flex-shrink: 0;
+        } 
+.hover-card {
+    transition: all 0.3s ease-in-out;
+    cursor: pointer;
+}
+
+.hover-card:hover {
+    transform: translateY(-10px) scale(1.02);
+    box-shadow: 0 10px 20px rgba(220, 53, 69, 0.3) !important;
+}
+
+.card-img-container {
+    overflow: hidden;
+    transition: all 0.3s ease;
+}
+
+.hover-card:hover .card-img-container {
+    background: linear-gradient(145deg, #e84c5c, #a01021) !important;
+}
+
+.card-icon {
+    transition: all 0.3s ease;
+}
+
+.hover-card:hover .card-icon {
+    transform: scale(1.2) rotate(5deg);
+}
+
+@keyframes pulse {
+    0% { transform: scale(1); }
+    50% { transform: scale(1.1); }
+    100% { transform: scale(1); }
+}
+
+.pulse-animation {
+    animation: pulse 2s infinite;
+}
+
+.rounded-4 {
+    border-radius: 1.5rem !important;
+}
