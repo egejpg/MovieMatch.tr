@@ -1,0 +1,127 @@
+ body {
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+        }
+        
+        main {
+            flex: 1 0 auto;
+        }
+        
+        .footer {
+            flex-shrink: 0;
+        } 
+.hover-card {
+    transition: all 0.3s ease-in-out;
+    cursor: pointer;
+}
+
+.hover-card:hover {
+    transform: translateY(-10px) scale(1.02);
+    box-shadow: 0 10px 20px rgba(220, 53, 69, 0.3) !important;
+}
+
+.card-img-container {
+    overflow: hidden;
+    transition: all 0.3s ease;
+}
+
+
+.card-icon {
+    transition: all 0.3s ease;
+}
+
+.hover-card:hover .card-icon {
+    transform: scale(1.2) rotate(5deg);
+}
+
+@keyframes pulse {
+    0% { transform: scale(1); }
+    50% { transform: scale(1.1); }
+    100% { transform: scale(1); }
+}
+
+
+
+/* Shuffle Card */
+.hover-card-shuffle {
+    transition: all 0.3s ease-in-out;
+    cursor: pointer;
+}
+
+.hover-card-shuffle:hover {
+    transform: translateY(-10px) scale(1.02);
+    box-shadow: 0 10px 20px rgba(167, 40, 80, 0.3) !important;
+}
+
+
+
+@keyframes shuffle-rotate {
+    0% { transform: rotate(0deg) scale(1); }
+    50% { transform: rotate(10deg) scale(1.1); }
+    100% { transform: rotate(0deg) scale(1); }
+}
+
+.card-icon-shuffle {
+    transition: all 0.3s ease;
+}
+
+.hover-card-shuffle:hover .card-icon-shuffle {
+    animation: shuffle-rotate 0.6s ease-in-out;
+}
+
+.rounded-4 {
+    border-radius: 1.5rem !important;
+}
+
+/* Modal */
+.modal-content {
+    border-radius: 1.5rem !important;
+    box-shadow: 0 10px 40px rgba(220, 53, 69, 0.2);
+}
+
+.modal-header {
+    border-radius: 1.5rem 1.5rem 0 0 !important;
+}
+
+.input-group-text {
+    transition: all 0.3s ease;
+}
+
+.form-control:focus {
+    background-color: #333 !important;
+    border-color: #dc3545 !important;
+    color: #ffffff;
+    box-shadow: 0 0 0 0.2rem rgba(220, 53, 69, 0.25);
+}
+
+.list-group-item {
+    transition: all 0.2s ease;
+    cursor: pointer;
+}
+
+.list-group-item:hover {
+    background-color: #333 !important;
+    border-left: 4px solid #dc3545 !important;
+    padding-left: calc(1rem - 4px) !important;
+}
+
+.modal-backdrop {
+    background-color: rgba(0, 0, 0, 0.8);
+}
+
+#confirmMovieBtn:disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
+}
+
+#confirmMovieBtn:not(:disabled):hover {
+    background-color: #a01021 !important;
+    transform: translateY(-2px);
+    box-shadow: 0 5px 15px rgba(220, 53, 69, 0.3);
+}
+
+.form-control::placeholder {
+            color: rgb(250, 247, 247);
+            opacity: 0.6;
+}

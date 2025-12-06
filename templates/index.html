@@ -1,0 +1,109 @@
+{% extends "layout.html" %}
+
+{% block title %}Anasayfa - MovieMatch{% endblock %}
+
+{% block content %}
+<div class="hero-section py-5" style="background-color: #1a1a1a;">
+    <div class="container">
+        <div class="row">
+            <div class="col-12 text-center">
+                <h1 class="display-4 text-white mb-4 animate__animated animate__fadeIn">Film Keşfetmenin Yeni Yolu</h1>
+                <p class="lead text-light mb-5 animate__animated animate__fadeIn">
+                    MovieMatch, arkadaşlarınızla film seçimini kolaylaştıran yenilikçi bir platformdur. 
+                    Tercihlerinizi belirleyin, arkadaşlarınızla paylaşın ve yapay zeka destekli sistemimiz 
+                    size mükemmel film eşleşmelerini sunsun. Artık "Ne izlesek?" sorusu tarihe karışıyor!
+                </p>
+            </div>
+        </div>
+        
+
+        <div class="row g-6">
+            <!-- Film Kartı 1 -->
+            <div class="col-lg-6 col-md-6">
+                <button class="card h-75 border-0 shadow hover-card animate__animated animate__fadeInUp rounded-4 w-100 p-0 btn" style="background: none; border: none;" data-bs-toggle="modal" data-bs-target="#movieSearchModal" data-user="user1">
+                    <div class="card-img-container position-relative rounded-4" style="aspect-ratio: 16/9; background: linear-gradient(145deg, #dc3545, #900d1d);">
+                        <div class="d-flex flex-column align-items-center justify-content-center h-100">
+                            <i class="fas fa-film fa-3x text-white mb-3 card-icon"></i>
+                            <h5 class="card-title text-white mb-0">Kendi filmini seç!</h5>
+                        </div>
+                    </div>
+                </button>
+            </div>
+
+            <!-- Film Kartı 2 -->
+            <div class="col-lg-6 col-md-6">
+                <button class="card h-75 border-0 shadow hover-card animate__animated animate__fadeInUp rounded-4 w-100 p-0 btn" style="background: none; border: none;" data-bs-toggle="modal" data-bs-target="#movieSearchModal" data-user="user2">
+                    <div class="card-img-container position-relative rounded-4" style="aspect-ratio: 16/9; background: linear-gradient(145deg, #dc3545, #900d1d);">
+                        <div class="d-flex flex-column align-items-center justify-content-center h-100">
+                            <i class="fas fa-film fa-3x text-white mb-3 card-icon"></i>
+                            <h5 class="card-title text-white mb-0">Arkadaşınla devam et</h5>
+                        </div>
+                    </div>
+                </button>
+            </div>
+            <!-- Film Kartı Sonuç - Karıştır -->
+            <div class="col-lg-6 col-md-6 mx-auto">
+                <button class="card h-75 border-0 shadow hover-card-shuffle animate__animated animate__fadeInUp rounded-4 w-100 p-0 btn" style="background: none; border: none;" id="shuffleBtn">
+                    <div class="card-img-container position-relative rounded-4" style="aspect-ratio: 16/9; background: linear-gradient(145deg,  #dc3545, #900d1d); overflow: hidden;">
+                        <div class="d-flex flex-column align-items-center justify-content-center h-100">
+                            <i class="fas fa-random fa-3x text-white mb-3 card-icon-shuffle"></i>
+                            <h5 class="card-title text-white mb-0">Karıştır</h5>
+                        </div>
+                    </div>
+                </button>
+            </div>
+            
+        </div>
+    </div>
+    
+</div>
+
+<!-- Modal Arama Popup -->
+<div class="modal fade" id="movieSearchModal" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog modal-lg modal-dialog-centered">
+        <div class="modal-content" style="background-color: #1a1a1a; border: 2px solid #dc3545;">
+            <div class="modal-header border-bottom" style="border-color: #dc3545 !important;">
+                <h5 class="modal-title text-white" id="modalUserTitle">Film Seç</h5>
+                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                <!-- Arama Input -->
+                <div class="search-container mb-4">
+                    <div class="input-group input-group-lg">
+                        <span class="input-group-text" style="background-color: #2a2a2a; border-color: #dc3545; color: #dc3545;">
+                            <i class="fas fa-search"></i>
+                        </span>
+                        <input type="text" class="form-control" id="movieSearchInput" placeholder="Film adı yazınız..." 
+                               style="background-color: #2a2a2a; border-color: #dc3545; color: #ffffff;" 
+                               autocomplete="off">
+                    </div>
+                </div>
+
+                <!-- Arama Sonuçları -->
+                <div id="searchResultsContainer">
+                    <p class="text-center text-white">Film aramak için yazınız...</p>
+                </div>
+
+                <!-- Seçilen Film -->
+                <div class="mt-4 pt-4 border-top" style="border-color: #333 !important;">
+                    <label class="text-white mb-2">Seçilen Film:</label>
+                    <div id="selectedMovieDisplay" class="p-3 rounded" style="background-color: #2a2a2a; border: 1px solid #dc3545; min-height: 60px; display: flex; align-items: center; justify-content: center;">
+                        <span class="text-secondary">Henüz film seçilmedi</span>
+                    </div>
+                </div>
+            </div>
+            <div class="modal-footer border-top" style="border-color: #333 !important;">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">İptal</button>
+                <button type="button" class="btn" id="confirmMovieBtn" style="background-color: #dc3545; color: white;" disabled>
+                    <i class="fas fa-check me-2"></i>Filmi Seç
+                </button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script src="{{ url_for('static', filename='js/main.js') }}"></script>
+
+
+
+{% endblock %}
