@@ -8,8 +8,10 @@ from datetime import timedelta
 # # Environment variables yükle
 # load_dotenv()
 
+
 # Flask uygulamasını başlat
 app = Flask(__name__)
+
 
 # Flask yapılandırması
 # app.config['SECRET_KEY'] = os.getenv('SECRET_KEY', 'sana_ozel_ve_cok_gizli_bir_key')
@@ -353,6 +355,7 @@ def not_found(error):
 def server_error(error):
     return render_template('500.html'), 500
 
+if __name__ == "__main__":
+    app.run(host="0.0.0.0", port=int(os.environ.get("PORT", 5000)))
 
-if __name__ == '__main__':
-    app.run(debug=True)
+
