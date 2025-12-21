@@ -4,22 +4,24 @@ import os
 from config import TMDB_API_KEY, GEMINI_API_KEY, SECRET_KEY
 import google.generativeai as genai
 from datetime import timedelta
+import random
+# Imports
 
-# # Environment variables yükle
+
+# # Environment variables
 # load_dotenv()
 
 
-# Flask uygulamasını başlat
+# Start Flask app
 app = Flask(__name__)
 
 
-# Flask yapılandırması
-# app.config['SECRET_KEY'] = os.getenv('SECRET_KEY', 'sana_ozel_ve_cok_gizli_bir_key')
+# Flask configuration
 app.config['SECRET_KEY'] = SECRET_KEY
 app.config['SESSION_COOKIE_DURATION'] = timedelta(hours=1)
 app.permanent_session_lifetime = timedelta(hours=1)
 
-# Google Generative AI yapılandırması
+# Google Generative AI configuration
 if GEMINI_API_KEY and GEMINI_API_KEY != "YOUR_GEMINI_API_KEY":
     genai.configure(api_key=GEMINI_API_KEY)
     model = genai.GenerativeModel('gemini-flash-lite-latest')
@@ -35,8 +37,9 @@ TMDB_IMAGE_BASE_URL = "https://image.tmdb.org/t/p/w500"
 
 def search_movies(query):
     """
-    MovieDB API'den film ara
+    Search movies from TMDB Api
     """
+    # Check if the TMDB API key is set 
     if not TMDB_API_KEY or TMDB_API_KEY == "YOUR_TMDB_API_KEY":
         # Mock data
         return [
@@ -44,6 +47,7 @@ def search_movies(query):
         ]
     
     try:
+        # Request headers with Bearer token authentication
         headers = {
             'Authorization': f'Bearer {TMDB_API_KEY}',
             'accept': 'application/json'
@@ -52,8 +56,6 @@ def search_movies(query):
             'query': query,
             'language': 'en-US'  
         }
-        
-        # Debug: Bul isteğin tam URL'sini
         full_url = TMDB_SEARCH_URL + '?' + '&'.join([f'{k}={v}' for k, v in params.items()])
         print(f"[DEBUG] Requesting: {full_url}")
         print(f"[DEBUG] Headers: {headers}")
@@ -63,9 +65,9 @@ def search_movies(query):
         data = response.json()
         
         print(f"[DEBUG] API Response: {data}")
-        
         movies = []
-        for movie in data.get('results', [])[:5]:  # İlk 5 sonuç
+        # Iterate over the first 5 movie results from the API response
+        for movie in data.get('results', [])[:5]:  # First 5 results
             release_date = movie.get('release_date', '')
             year = release_date[:4] if release_date else 'N/A'
             rating = movie.get('vote_average', 0)
@@ -86,15 +88,17 @@ def search_movies(query):
         print(f"[ERROR] TMDB API Error: {e}")
         return []
 
-
+# Horizontal movie background 
 def get_movie_backdrop(movie_title):
     """
-    Verilen film adını TMDB'de ara ve backdrop_path'ini döndür
+    Search for movie backdrop with the given movie title using TMDB Api
     """
+    # Check if the TMDB API key is set 
     if not TMDB_API_KEY or TMDB_API_KEY == "YOUR_TMDB_API_KEY":
         return None
     
     try:
+        # Request headers with Bearer token authentication
         headers = {
             'Authorization': f'Bearer {TMDB_API_KEY}',
             'accept': 'application/json'
@@ -120,7 +124,7 @@ def get_movie_backdrop(movie_title):
 
 def get_fallback_recommendation(user1_movie, user2_movie):
     """
-    Gemini API başarısız olduğunda veya yapılandırılmadığında fallback öneriler
+    Recommendations if Gemini Api fails
     """
     fallback_movies = [
         ("The Shawshank Redemption", "Her iki filmin de karakter derinliği ve duygusal hikaye sunmaktadır."),
@@ -133,7 +137,8 @@ def get_fallback_recommendation(user1_movie, user2_movie):
         ("Goodfellas", "Sinematografi ve hikaye anlatımı ile başarılıdır.")
     ]
     
-    import random
+    # Random movie selection since there is not much fallback movie data 
+    # For further versions i will upgrade fallback section with more data and reasoning 
     movie, reason = random.choice(fallback_movies)
     
     print(f"[FALLBACK] User1: {user1_movie}, User2: {user2_movie} -> Recommended: {movie}")
@@ -146,12 +151,14 @@ def get_fallback_recommendation(user1_movie, user2_movie):
 
 def movie_exists_in_tmdb(movie_title):
     """
-    TMDB'de filmin olup olmadığını kontrol et
+    Check if movie is exists in TMDB 
     """
+    # Check if the TMDB API key is set 
     if not TMDB_API_KEY or TMDB_API_KEY == "YOUR_TMDB_API_KEY":
         return False
     
     try:
+        # Request headers with Bearer token authentication
         headers = {
             'Authorization': f'Bearer {TMDB_API_KEY}',
             'accept': 'application/json'
@@ -160,8 +167,11 @@ def movie_exists_in_tmdb(movie_title):
             'query': movie_title,
             'language': 'en-US'
         }
+        # Send GET request to TMDB search endpoint
         response = requests.get(TMDB_SEARCH_URL, headers=headers, params=params, timeout=5)
+        # Parse results from the API response
         results = response.json().get('results', [])
+        # Movie exists if at least one result is returned
         return len(results) > 0
     except Exception as e:
         print(f"[ERROR] Failed to check movie in TMDB: {e}")
@@ -170,7 +180,7 @@ def movie_exists_in_tmdb(movie_title):
 
 def find_matching_movie(user1_movie, user2_movie):
     """
-    İki filmin ortak noktasında bir film öner (Gemini AI ile, TMDB'de var olanlardan)
+    Find matching movies with Gemini Api only if it exists in TMDB 
     """
     if model is None:
         # Fallback to mock data if Gemini is not configured
@@ -178,7 +188,9 @@ def find_matching_movie(user1_movie, user2_movie):
         return get_fallback_recommendation(user1_movie, user2_movie)
     
     try:
-        # Gemini prompt oluştur - 3 alternatif film öner
+        # Build Gemini prompt requesting 3 alternative movie recommendations
+        # For further versions i will ask for 5 and store the recommendations to lower costs and to not trigger rate per day 
+        # ,when user shuffles again with same movies i will use the stored data 
         prompt = f"""Sen bir film meraklısı ve tavsiye uzmanısın. İki kullanıcı şu filmleri seçti:
 
 Kullanıcı 1: {user1_movie}
@@ -200,11 +212,11 @@ Bu iki filmi sevmiş olan birisi için, her iki filmin de özelliklerini (tür, 
 
 Şimdi cevapını ver:"""
         
-        # Gemini'ye istek gönder
+        # Send request to Gemini
         response = model.generate_content(prompt, stream=False)
         response_text = response.text.strip()
         
-        # Cevabı parse et (3 film alıp ilkini TMDB'de kontrol et)
+        # Parse Gemini response into movie recommendations
         recommendations = []
         lines = response_text.split('\n')
         
@@ -213,14 +225,14 @@ Bu iki filmi sevmiş olan birisi için, her iki filmin de özelliklerini (tür, 
             if not line or '|' not in line:
                 continue
             
-            # Numara kısmını kaldır (1., 2., etc.)
+             # Remove numbering (1., 2., 3.)
             cleaned_line = line
             for i in range(1, 4):
                 if line.startswith(f"{i}."):
                     cleaned_line = line[len(f"{i}."):].strip()
                     break
             
-            # Filmi parse et
+            # Parse movie title and explanation
             parts = cleaned_line.split('|', 1)
             if len(parts) == 2:
                 movie_title = parts[0].strip()
@@ -229,7 +241,7 @@ Bu iki filmi sevmiş olan birisi için, her iki filmin de özelliklerini (tür, 
         
         print(f"[MATCH] Gemini recommendations for {user1_movie} & {user2_movie}: {recommendations}")
         
-        # İlk geçerli filmi TMDB'de ara
+        # Search for first valid movie title in TMDB
         for movie_title, reason in recommendations:
             if movie_exists_in_tmdb(movie_title):
                 print(f"[MATCH] Found valid TMDB movie: {movie_title}")
@@ -240,7 +252,7 @@ Bu iki filmi sevmiş olan birisi için, her iki filmin de özelliklerini (tür, 
                     "backdrop_path": backdrop_path
                 }
         
-        # Eğer hiçbiri TMDB'de yoksa fallback kullan
+        # If none use fallback
         print(f"[WARNING] No valid TMDB movies found in recommendations, using fallback")
         fallback_result = get_fallback_recommendation(user1_movie, user2_movie)
         backdrop_path = get_movie_backdrop(fallback_result['movie'])
@@ -249,9 +261,9 @@ Bu iki filmi sevmiş olan birisi için, her iki filmin de özelliklerini (tür, 
     
     except Exception as e:
         print(f"[ERROR] Gemini API Error: {e}")
-        # Hata durumunda fallback öneriler kullan
+        # Use fallback suggestions
         fallback_result = get_fallback_recommendation(user1_movie, user2_movie)
-        # Fallback film için de backdrop'ı al
+        # Also get backdrop for fallback recommendation
         backdrop_path = get_movie_backdrop(fallback_result['movie'])
         fallback_result['backdrop_path'] = backdrop_path
         return fallback_result
@@ -261,16 +273,12 @@ Bu iki filmi sevmiş olan birisi için, her iki filmin de özelliklerini (tür, 
 
 @app.route('/')
 def index():
-    """Anasayfa"""
+    """Home"""
     return render_template('index.html')
 
 
 @app.route('/api/search-movie', methods=['POST'])
 def api_search_movie():
-    """
-    Film ara endpoint
-    POST JSON: { "query": "film adı" }
-    """
     data = request.get_json()
     query = data.get('query', '').strip()
     
@@ -287,10 +295,6 @@ def api_search_movie():
 
 @app.route('/api/select-movie', methods=['POST'])
 def api_select_movie():
-    """
-    Kullanıcının seçtiği filmi session'a kaydet
-    POST JSON: { "user": "user1" or "user2", "movie": {...} }
-    """
     data = request.get_json()
     user = data.get('user')
     movie = data.get('movie')
@@ -309,12 +313,9 @@ def api_select_movie():
     
     return jsonify({'success': True, 'message': f'{user} filmi kaydedildi'})
 
-
+# Find match with given 2 movies
 @app.route('/api/find-match', methods=['POST'])
 def api_find_match():
-    """
-    İki filmin ortak noktasında bir film bul
-    """
     selected_movies = session.get('selected_movies', {})
     
     if 'user1' not in selected_movies or 'user2' not in selected_movies:
@@ -325,7 +326,7 @@ def api_find_match():
     
     print(f"[MATCH] Finding match for: {user1_movie} & {user2_movie}")
     
-    # Önerme al
+    # Get suggestion
     result = find_matching_movie(user1_movie, user2_movie)
     
     return jsonify({
@@ -337,10 +338,9 @@ def api_find_match():
         'backdrop_path': result.get('backdrop_path')
     })
 
-
+#
 @app.route('/results')
 def results():
-    """Sonuçlar sayfası"""
     selected_movies = session.get('selected_movies', {})
     return render_template('results.html', selected_movies=selected_movies)
 
