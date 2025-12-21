@@ -1,10 +1,10 @@
-let selectedMovie = null;
+    let selectedMovie = null;
     let currentUser = null;
     let selectedMovies = {};
     let searchTimeout = null;
     let currentSearchRequest = null;
 
-    // Modal açıldığında user bilgisini al
+    // When the movie search modal opens, determine which user is selecting a movie
     const movieSearchModal = document.getElementById('movieSearchModal');
     movieSearchModal.addEventListener('show.bs.modal', function (event) {
         const button = event.relatedTarget;
@@ -25,35 +25,35 @@ let selectedMovie = null;
         document.getElementById('confirmMovieBtn').disabled = true;
     });
 
-    // Arama input event listener - Debounce ile
+    // Search input event listener - with debounce 
     document.getElementById('movieSearchInput').addEventListener('input', function(e) {
         const query = e.target.value.trim();
         
-        // Önceki timeout'u iptal et
+        // Cancel previous debounce timeout
         if (searchTimeout) {
             clearTimeout(searchTimeout);
         }
-        
+        // Do not search for short querys
         if (query.length < 2) {
             document.getElementById('searchResultsContainer').innerHTML = '<p class="text-center text-white">Film aramak için yazınız...</p>';
             return;
         }
 
-        // 300ms sonra ara debounce
+        // Delay search request by 300ms debounce
         searchTimeout = setTimeout(function() {
             searchMovies(query);
         }, 300);
     });
 
     function searchMovies(query) {
-        // Önceki isteği iptal et AbortController
+        // AbortController
         if (currentSearchRequest) {
             currentSearchRequest.abort();
         }
         
         currentSearchRequest = new AbortController();
         
-        // Backend API'ye istek gönder
+        // Send search request to backend API
         document.getElementById('searchResultsContainer').innerHTML = '<div class="text-center"><span class="spinner-border spinner-border-sm text-danger me-2"></span><span class="text-white">Aranıyor...</span></div>';
         
         fetch('/api/search-movie', {
@@ -121,9 +121,8 @@ let selectedMovie = null;
             currentSearchRequest = null;
         });
     }
-
+    // Attach click handlers to movie search results
     function attachMovieClickHandlers() {
-        // Film seçme olayları
         document.querySelectorAll('.movie-result').forEach(item => {
             item.addEventListener('click', function() {
                 selectedMovie = {
@@ -133,7 +132,7 @@ let selectedMovie = null;
                     backdrop_path: this.getAttribute('data-movie-backdrop')
                 };
 
-                // Seçilen filmi göster
+                // Display selected movie info
                 const selectedDisplay = document.getElementById('selectedMovieDisplay');
                 selectedDisplay.innerHTML = `
                     <div class="d-flex align-items-center">
@@ -143,7 +142,7 @@ let selectedMovie = null;
                 `;
                 selectedDisplay.querySelector('span').textContent = `${selectedMovie.title} (${selectedMovie.year})`;
 
-                // Confirm butonunu aktifleştir
+                // Enable confirm button
                 document.getElementById('confirmMovieBtn').disabled = false;
 
                 document.querySelectorAll('.movie-result').forEach(el => {
@@ -156,10 +155,10 @@ let selectedMovie = null;
         });
     }
 
-    // Filmi onayla
+    // Confirm movie
     document.getElementById('confirmMovieBtn').addEventListener('click', function() {
         if (selectedMovie && currentUser) {
-            // Backend'e filmini kaydet
+            // Store selected movie
             fetch('/api/select-movie', {
                 method: 'POST',
                 headers: {
@@ -173,15 +172,14 @@ let selectedMovie = null;
             .then(response => response.json())
             .then(data => {
                 if (data.success) {
-                    // Local olarak da kaydet
+                    // Save locally
                     selectedMovies[currentUser] = selectedMovie;
                     console.log(`${currentUser}: ${selectedMovie.title} kaydedildi`);
                     
-                    // Modal'ı kapat
+                    // Close modal
                     const modal = bootstrap.Modal.getInstance(movieSearchModal);
                     modal.hide();
                     
-                    // UI'da seçilen filmi göster
                     updateSelectedMoviesUI();
                 }
             })
@@ -193,7 +191,7 @@ let selectedMovie = null;
     });
 
     function updateSelectedMoviesUI() {
-        // user1 kartını güncelle
+        // Update user 1's card
         if (selectedMovies.user1) {
             const user1Card = document.querySelector('[data-user="user1"]');
             if (user1Card) {
@@ -216,7 +214,7 @@ let selectedMovie = null;
             }
         }
         
-        // user2 kartını güncelle
+        // Update user 2's card
         if (selectedMovies.user2) {
             const user2Card = document.querySelector('[data-user="user2"]');
             if (user2Card) {
@@ -230,8 +228,6 @@ let selectedMovie = null;
                     cardContainer.style.backgroundSize = 'cover';
                     cardContainer.style.backgroundPosition = 'center';
                     cardContainer.style.backgroundRepeat = 'no-repeat';
-                    
-                    // İçeriğe yarı saydam siyah arka plan ekle
                     cardContent.style.background = 'rgba(0, 0, 0, 0.5)';
                 }
                 
@@ -240,7 +236,7 @@ let selectedMovie = null;
         }
     }
 
-    // Shuffle Butonu
+    // Shuffle Button 
     document.getElementById('shuffleBtn').addEventListener('click', function() {
         if (!selectedMovies.user1 || !selectedMovies.user2) {
             alert('Lütfen her iki kullanıcının da film seçmesini sağlayın');
@@ -255,7 +251,7 @@ let selectedMovie = null;
         cardContainer.innerHTML = '<div class="d-flex align-items-center justify-content-center h-100"><span class="spinner-border spinner-border-sm text-white me-2"></span><span class="text-white">Eşleştiriliyor...</span></div>';
         shuffleBtn.disabled = true;
         
-        // Gemini API'ye istek gönder
+        // Request movie match from Gemini
         fetch('/api/find-match', {
             method: 'POST',
             headers: {
@@ -265,7 +261,7 @@ let selectedMovie = null;
         .then(response => response.json())
         .then(data => {
             if (data.success) {
-                // 3. kartı sonuç göster
+                // Display the matched movie result
                 displayResult(data.recommended_movie, data.reason, data.backdrop_path);
                 shuffleBtn.disabled = false;
             } else {
@@ -285,7 +281,7 @@ let selectedMovie = null;
     function displayResult(movieTitle, reason, backdropPath) {
         const shuffleBtn = document.getElementById('shuffleBtn');
         
-        // Kartın içeriğini güncelle
+        // Update card container
         const cardContainer = shuffleBtn.querySelector('.card-img-container');
         
         if (!cardContainer) {
@@ -293,11 +289,10 @@ let selectedMovie = null;
             alert('Sonuç gösterilirken hata oluştu');
             return;
         }
-        
-        // Eski içeriği tut
+
         const originalHTML = cardContainer.innerHTML;
         
-        // Backdrop URL- Önerilen filmin backdrop'ini kullan, yoksa fallback
+        // Backdrop URL with fallback backdrop
         const backdropUrl = backdropPath
             ? `https://image.tmdb.org/t/p/w780${backdropPath}`
             : (selectedMovies.user2?.backdrop_path 
@@ -306,7 +301,7 @@ let selectedMovie = null;
                     ? `https://image.tmdb.org/t/p/w780${selectedMovies.user1.backdrop_path}`
                     : 'https://via.placeholder.com/1280x720?text=Film'));
         
-        // Yeni içeriği oluştur
+        // Apply backdrop styling
         cardContainer.style.backgroundImage = `url('${backdropUrl}')`;
         cardContainer.style.backgroundSize = 'cover';
         cardContainer.style.backgroundPosition = 'center';
@@ -325,7 +320,7 @@ let selectedMovie = null;
         
         cardContainer.innerHTML = resultHTML;
         
-        // Reset fonksiyonunu global yap
+        // Expose reset function globally
         window.resetResult = function() {
             cardContainer.style.backgroundImage = '';
             cardContainer.innerHTML = originalHTML;
